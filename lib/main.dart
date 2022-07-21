@@ -14,25 +14,25 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Startup Name Generator',
+        title: 'Todo List',
         theme: ThemeData(
           appBarTheme: const AppBarTheme(
             backgroundColor: Colors.white,
             foregroundColor: Colors.blue,
           ),
         ),
-        home: RandomWords());
+        home: TodoList());
   }
 }
 
-class RandomWords extends StatefulWidget {
-  const RandomWords({Key? key}) : super(key: key);
+class TodoList extends StatefulWidget {
+  const TodoList({Key? key}) : super(key: key);
 
   @override
-  State<RandomWords> createState() => _RandomWordsState();
+  State<TodoList> createState() => _TodoListState();
 }
 
-class _RandomWordsState extends State<RandomWords> {
+class _TodoListState extends State<TodoList> {
   final _todos = <String>[];
   final _doneTodo = <String>[];
   final _biggerFont = const TextStyle(fontSize: 18);
