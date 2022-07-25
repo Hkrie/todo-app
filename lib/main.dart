@@ -34,8 +34,8 @@ class _TodoListState extends State<TodoList> {
   final _doneTodos = <String>[];
   final _biggerFont = const TextStyle(fontSize: 18);
 
-  Widget slideIt(BuildContext context, int index, animation) {
-    String item = _todos[index];
+  Widget slideIt(BuildContext context, String? removedItem, int index, animation) {
+    String item = removedItem ?? _todos[index];
     final alreadyDone = _doneTodos.contains(item);
     return SlideTransition(
       position: Tween<Offset>(
@@ -45,7 +45,7 @@ class _TodoListState extends State<TodoList> {
       child: SizedBox(
           child: ListTile(
             title: Text(
-              item,
+              item + _todos.length.toString(),
               style: _biggerFont,
             ),
             trailing: Icon(
@@ -55,10 +55,13 @@ class _TodoListState extends State<TodoList> {
             ),
             onTap: () {
               _doneTodos.add(item);
+              int removeIndex = _todos.indexOf(item);
+              String removedItem = _todos.removeAt(removeIndex);
+
+
               listKey.currentState?.removeItem(
-                  _todos.indexOf(item), (_, animation) => slideIt(context, index, animation),
+                  removeIndex, (_, animation) => slideIt(context,removedItem, index, animation),
                   duration: const Duration(milliseconds: 500));
-              _todos.remove(item);
             },
           )),
     );
@@ -161,7 +164,7 @@ class _TodoListState extends State<TodoList> {
         key: listKey,
         initialItemCount: _todos.length,
         itemBuilder: (context, index, animation) {
-          return slideIt(context, index, animation);
+          return slideIt(context, null, index, animation);
         },
       ),
     );
