@@ -1,7 +1,3 @@
-// Copyright 2018 The Flutter team. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -21,7 +17,7 @@ class MyApp extends StatelessWidget {
             foregroundColor: Colors.blue,
           ),
         ),
-        home: TodoList());
+        home: const TodoList());
   }
 }
 
@@ -33,20 +29,44 @@ class TodoList extends StatefulWidget {
 }
 
 class _TodoListState extends State<TodoList> {
+  final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
   final _todos = <String>[];
-  final _doneTodo = <String>[];
+  final _doneTodos = <String>[];
   final _biggerFont = const TextStyle(fontSize: 18);
+
+  Widget slideIt(BuildContext context, int index, animation) {
+    String item = _todos[index];
+    final alreadyDone = _doneTodos.contains(item);
+    return SlideTransition(
+      position: Tween<Offset>(
+        begin: const Offset(-1, 0),
+        end: const Offset(0, 0),
+      ).animate(animation),
+      child: SizedBox(
+          child: ListTile(
+            title: Text(
+              item,
+              style: _biggerFont,
+            ),
+            trailing: Icon(
+              alreadyDone ? Icons.check_box : Icons.check_box_outline_blank,
+              color: alreadyDone ? Colors.blue : null,
+              semanticLabel: alreadyDone ? "Remove from done" : "Finish",
+            ),
+            onTap: () {
+              _doneTodos.add(item);
+              listKey.currentState?.removeItem(
+                  _todos.indexOf(item), (_, animation) => slideIt(context, index, animation),
+                  duration: const Duration(milliseconds: 500));
+              _todos.remove(item);
+            },
+          )),
+    );
+  }
 
   void _addTodo() {
     Navigator.of(context).push(MaterialPageRoute<void>(builder: (context) {
       final myController = TextEditingController();
-
-      @override
-      void dispose() {
-        // Clean up the controller when the widget is disposed.
-        myController.dispose();
-        super.dispose();
-      }
 
       return Scaffold(
           appBar: AppBar(
@@ -58,9 +78,9 @@ class _TodoListState extends State<TodoList> {
               children: [
                 TextField(
                   onSubmitted: (textValue) {
-                    setState(() {
-                      _todos.add(textValue);
-                    });
+                    listKey.currentState!.insertItem(_todos.length,
+                        duration: const Duration(milliseconds: 500));
+                    _todos.add(textValue);
                     Navigator.of(context).pop();
                   },
                   autofocus: true,
@@ -74,9 +94,9 @@ class _TodoListState extends State<TodoList> {
                 IconButton(
                     color: Colors.blue,
                     onPressed: () {
-                      setState(() {
-                        _todos.add(myController.text);
-                      });
+                      listKey.currentState!.insertItem(0,
+                          duration: const Duration(milliseconds: 500));
+                      _todos.insert(0, myController.text);
                       Navigator.of(context).pop();
                     },
                     icon: const Icon(Icons.add))
@@ -88,17 +108,17 @@ class _TodoListState extends State<TodoList> {
 
   void _showDoneTodo() {
     Navigator.of(context).push(MaterialPageRoute<void>(builder: (context) {
-      final tiles = _doneTodo.map((string) {
+      final tiles = _doneTodos.map((string) {
         return ListTile(
           trailing: const Icon(
             Icons.check_box,
             semanticLabel: "Remove from done",
           ),
           onTap: () {
-            setState(() {
-              _doneTodo.remove(string);
-              _todos.add(string);
-            });
+            listKey.currentState!.insertItem(_todos.length,
+                duration: const Duration(milliseconds: 500));
+            _todos.add(string);
+            _doneTodos.remove(string);
             Navigator.of(context).pop();
           },
           title: Text(
@@ -123,7 +143,7 @@ class _TodoListState extends State<TodoList> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Startup Name Generator'),
+        title: const Text('Todo List'),
         actions: [
           IconButton(
             onPressed: _addTodo,
@@ -137,36 +157,13 @@ class _TodoListState extends State<TodoList> {
           )
         ],
       ),
-      body: ListView.builder(
-          padding: const EdgeInsets.all(16.0),
-          itemCount: _todos.length * 2,
-          itemBuilder: (context, i) {
-            if (i.isOdd) return const Divider();
-            final index = i ~/ 2;
-            final alreadyDone = _doneTodo.contains(_todos[index]);
-            return ListTile(
-              title: Text(
-                _todos[index],
-                style: _biggerFont,
-              ),
-              trailing: Icon(
-                alreadyDone ? Icons.check_box : Icons.check_box_outline_blank,
-                color: alreadyDone ? Colors.blue : null,
-                semanticLabel: alreadyDone ? "Remove from done" : "Finish",
-              ),
-              onTap: () {
-                setState(() {
-                  if (alreadyDone) {
-                    _doneTodo.remove(_todos[index]);
-                  } else {
-                    _doneTodo.add(_todos[index]);
-                    _todos.remove(_todos[index]);
-                  }
-                });
-              },
-            );
-          }),
+      body: AnimatedList(
+        key: listKey,
+        initialItemCount: _todos.length,
+        itemBuilder: (context, index, animation) {
+          return slideIt(context, index, animation);
+        },
+      ),
     );
   }
 }
-
