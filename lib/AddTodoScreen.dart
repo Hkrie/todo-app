@@ -18,6 +18,7 @@ class AddTodoScreen extends StatefulWidget {
 class _AddTodoScreenState extends State<AddTodoScreen> {
   final myController = TextEditingController();
   String dropdownValue = 'normal';
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -26,55 +27,63 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
         appBar: AppBar(
           title: const Text('Add Todo'),
         ),
-        body: Container(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              TextField(
-                autofocus: true,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'Enter a new Thing to do',
-                ),
-                controller: myController,
+        body: Form(
+            key: _formKey,
+            child: Container(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  TextFormField(
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter some text';
+                      }
+                      return null;
+                    },
+                    autofocus: true,
+                    controller: myController,
+                  ),
+                  DropdownButton<String>(
+                    value: dropdownValue,
+                    icon: const Icon(Icons.arrow_downward),
+                    elevation: 16,
+                    style: const TextStyle(color: Colors.deepPurple),
+                    underline: Container(
+                      height: 2,
+                      color: Colors.deepPurpleAccent,
+                    ),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        dropdownValue = newValue!;
+                      });
+                    },
+                    items: <String>[
+                      'Highest',
+                      'High',
+                      'normal',
+                      'low',
+                      'lowest'
+                    ].map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                  Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      child: IconButton(
+                          color: Colors.blue,
+                          onPressed: () {
+                            if (_formKey.currentState!.validate()) {
+                              final Todo newTodo =
+                                  Todo(myController.text, dropdownValue, null);
+                              Navigator.pop(context, newTodo);
+                            }
+                          },
+                          icon: const Icon(Icons.add)))
+                ],
               ),
-              DropdownButton<String>(
-                value: dropdownValue,
-                icon: const Icon(Icons.arrow_downward),
-                elevation: 16,
-                style: const TextStyle(color: Colors.deepPurple),
-                underline: Container(
-                  height: 2,
-                  color: Colors.deepPurpleAccent,
-                ),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    dropdownValue = newValue!;
-                  });
-                },
-                items: <String>['Highest', 'High', 'normal', 'low', 'lowest']
-                    .map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 16),
-              IconButton(
-                  color: Colors.blue,
-                  onPressed: () {
-                    // listKey.currentState!.insertItem(0,
-                    //     duration: const Duration(milliseconds: 500));
-                    // _todos.insert(0, _Todo(myController.text, dropdownValue));
-                    // Navigator.of(context).pop();
-                    final Todo newTodo =
-                        Todo(myController.text, dropdownValue, null);
-                    Navigator.pop(context, newTodo);
-                  },
-                  icon: const Icon(Icons.add))
-            ],
-          ),
-        ));
+            )));
   }
 }
