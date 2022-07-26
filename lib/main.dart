@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import './_todo.dart';
+import 'AddTodoScreen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -22,7 +24,9 @@ class MyApp extends StatelessWidget {
 }
 
 class TodoList extends StatefulWidget {
-  const TodoList({Key? key}) : super(key: key);
+  const TodoList({Key? key, this.newTodo, this.todoList}) : super(key: key);
+  final Todo? newTodo;
+  final List<Todo>? todoList;
 
   @override
   State<TodoList> createState() => _TodoListState();
@@ -30,12 +34,13 @@ class TodoList extends StatefulWidget {
 
 class _TodoListState extends State<TodoList> {
   final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
-  final _todos = <String>[];
-  final _doneTodos = <String>[];
+  List<Todo> _todos = <Todo>[];
+  final List<Todo> _doneTodos = <Todo>[];
   final _biggerFont = const TextStyle(fontSize: 18);
 
-  Widget slideIt(BuildContext context, String? removedItem, int index, animation) {
-    String item = removedItem ?? _todos[index];
+  Widget slideIt(
+      BuildContext context, Todo? removedItem, int index, animation) {
+    Todo item = removedItem ?? _todos[index];
     final alreadyDone = _doneTodos.contains(item);
     return SlideTransition(
       position: Tween<Offset>(
@@ -44,74 +49,31 @@ class _TodoListState extends State<TodoList> {
       ).animate(animation),
       child: SizedBox(
           child: ListTile(
-            title: Text(
-              item + _todos.length.toString(),
-              style: _biggerFont,
-            ),
-            trailing: Icon(
-              alreadyDone ? Icons.check_box : Icons.check_box_outline_blank,
-              color: alreadyDone ? Colors.blue : null,
-              semanticLabel: alreadyDone ? "Remove from done" : "Finish",
-            ),
-            onTap: () {
-              _doneTodos.add(item);
-              int removeIndex = _todos.indexOf(item);
-              String removedItem = _todos.removeAt(removeIndex);
+        title: Text(
+          item.todoText,
+          style: _biggerFont,
+        ),
+        trailing: Icon(
+          alreadyDone ? Icons.check_box : Icons.check_box_outline_blank,
+          color: alreadyDone ? Colors.blue : null,
+          semanticLabel: alreadyDone ? "Remove from done" : "Finish",
+        ),
+        onTap: () {
+          _doneTodos.add(item);
+          int removeIndex = _todos.indexOf(item);
+          Todo removedItem = _todos.removeAt(removeIndex);
 
-
-              listKey.currentState?.removeItem(
-                  removeIndex, (_, animation) => slideIt(context,removedItem, index, animation),
-                  duration: const Duration(milliseconds: 500));
-            },
-          )),
+          listKey.currentState?.removeItem(removeIndex,
+              (_, animation) => slideIt(context, removedItem, index, animation),
+              duration: const Duration(milliseconds: 500));
+        },
+      )),
     );
-  }
-
-  void _addTodo() {
-    Navigator.of(context).push(MaterialPageRoute<void>(builder: (context) {
-      final myController = TextEditingController();
-
-      return Scaffold(
-          appBar: AppBar(
-            title: const Text('Add Todo'),
-          ),
-          body: Container(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                TextField(
-                  onSubmitted: (textValue) {
-                    listKey.currentState!.insertItem(_todos.length,
-                        duration: const Duration(milliseconds: 500));
-                    _todos.add(textValue);
-                    Navigator.of(context).pop();
-                  },
-                  autofocus: true,
-                  decoration: const InputDecoration(
-                    border: UnderlineInputBorder(),
-                    labelText: 'Enter a new Thing to do',
-                  ),
-                  controller: myController,
-                ),
-                const SizedBox(height: 16),
-                IconButton(
-                    color: Colors.blue,
-                    onPressed: () {
-                      listKey.currentState!.insertItem(0,
-                          duration: const Duration(milliseconds: 500));
-                      _todos.insert(0, myController.text);
-                      Navigator.of(context).pop();
-                    },
-                    icon: const Icon(Icons.add))
-              ],
-            ),
-          ));
-    }));
   }
 
   void _showDoneTodo() {
     Navigator.of(context).push(MaterialPageRoute<void>(builder: (context) {
-      final tiles = _doneTodos.map((string) {
+      final tiles = _doneTodos.map((doneTodoItem) {
         return ListTile(
           trailing: const Icon(
             Icons.check_box,
@@ -120,12 +82,12 @@ class _TodoListState extends State<TodoList> {
           onTap: () {
             listKey.currentState!.insertItem(_todos.length,
                 duration: const Duration(milliseconds: 500));
-            _todos.add(string);
-            _doneTodos.remove(string);
+            _todos.add(doneTodoItem);
+            _doneTodos.remove(doneTodoItem);
             Navigator.of(context).pop();
           },
           title: Text(
-            string,
+            doneTodoItem.todoText,
             style: _biggerFont,
           ),
         );
@@ -144,12 +106,27 @@ class _TodoListState extends State<TodoList> {
 
   @override
   Widget build(BuildContext context) {
+    if (_todos.isEmpty && widget.todoList != null) {
+      _todos = widget.todoList!;
+    }
+    if (widget.newTodo != null) {
+      listKey.currentState!
+          .insertItem(0, duration: const Duration(milliseconds: 500));
+      _todos.insert(0, widget.newTodo!);
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Todo List'),
         actions: [
           IconButton(
-            onPressed: _addTodo,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => AddTodoScreen(oldTodoList: _todos)),
+              );
+            },
             icon: const Icon(Icons.add),
             tooltip: 'Add Todo',
           ),
