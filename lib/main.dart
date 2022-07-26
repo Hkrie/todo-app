@@ -24,10 +24,7 @@ class MyApp extends StatelessWidget {
 }
 
 class TodoList extends StatefulWidget {
-  const TodoList({Key? key, this.newTodo, this.todoList, this.doneTodoList}) : super(key: key);
-  final Todo? newTodo;
-  final List<Todo>? todoList;
-  final List<Todo>? doneTodoList;
+  const TodoList({Key? key}) : super(key: key);
 
   @override
   State<TodoList> createState() => _TodoListState();
@@ -38,6 +35,7 @@ class _TodoListState extends State<TodoList> {
   List<Todo> _todos = <Todo>[];
   List<Todo> _doneTodos = <Todo>[];
   final _biggerFont = const TextStyle(fontSize: 18);
+  final _normalFont = const TextStyle(fontSize: 14);
 
   Widget slideIt(
       BuildContext context, Todo? removedItem, int index, animation) {
@@ -53,6 +51,10 @@ class _TodoListState extends State<TodoList> {
         title: Text(
           item.todoText,
           style: _biggerFont,
+        ),
+        subtitle: Text(
+          item.todoPriority,
+          style: _normalFont,
         ),
         trailing: Icon(
           alreadyDone ? Icons.check_box : Icons.check_box_outline_blank,
@@ -105,32 +107,54 @@ class _TodoListState extends State<TodoList> {
     }));
   }
 
+  _convertPriority(prio) {
+    switch (prio) {
+      case 'Highest':
+        return 1;
+      case 'High':
+        return 2;
+      case 'normal':
+        return 3;
+      case 'low':
+        return 4;
+      case 'lowest':
+        return 5;
+    }
+  }
+
+  _sortTodosList() {
+    List<Todo> sortedTodos = List.from(_todos);
+
+    sortedTodos.sort((a, b) => _convertPriority(a.todoPriority)
+        .compareTo(_convertPriority(b.todoPriority)));
+    setState(() {
+      _todos = sortedTodos;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (_todos.isEmpty && widget.todoList != null) {
-      _todos = widget.todoList!;
-    }
-    if (widget.newTodo != null) {
-      listKey.currentState
-          ?.insertItem(0, duration: const Duration(milliseconds: 500));
-      _todos.insert(0, widget.newTodo!);
-    }
-
-    if(widget.doneTodoList != null){
-      _doneTodos = widget.doneTodoList!;
-    }
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Todo List'),
         actions: [
           IconButton(
-            onPressed: () {
-              Navigator.push(
+            onPressed: _sortTodosList,
+            icon: const Icon(Icons.sort),
+            tooltip: 'Sort Todo List',
+          ),
+          IconButton(
+            onPressed: () async {
+              final newTodo = await Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => AddTodoScreen(oldTodoList: _todos, doneTodoList: _doneTodos)),
+                    builder: (context) => AddTodoScreen(
+                        oldTodoList: _todos, doneTodoList: _doneTodos)),
               );
+              listKey.currentState!.insertItem(_todos.length,
+                  duration: const Duration(milliseconds: 500));
+              _todos.add(newTodo);
             },
             icon: const Icon(Icons.add),
             tooltip: 'Add Todo',

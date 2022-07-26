@@ -5,7 +5,9 @@ import '_todo.dart';
 import 'main.dart';
 
 class AddTodoScreen extends StatefulWidget {
-  const AddTodoScreen({Key? key, required this.oldTodoList, required this.doneTodoList}) : super(key: key);
+  const AddTodoScreen(
+      {Key? key, required this.oldTodoList, required this.doneTodoList})
+      : super(key: key);
   final List<Todo> oldTodoList;
   final List<Todo> doneTodoList;
 
@@ -50,7 +52,7 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
                     dropdownValue = newValue!;
                   });
                 },
-                items: <String>['Highest', 'High', 'normal', 'low', "lowest"]
+                items: <String>['Highest', 'High', 'normal', 'low', 'lowest']
                     .map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
@@ -66,17 +68,9 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
                     //     duration: const Duration(milliseconds: 500));
                     // _todos.insert(0, _Todo(myController.text, dropdownValue));
                     // Navigator.of(context).pop();
-                    final Todo newTodo = Todo(myController.text, dropdownValue);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TodoList(
-                          newTodo: newTodo,
-                          todoList: oldTodoList,
-                          doneTodoList: widget.doneTodoList
-                        ),
-                      ),
-                    );
+                    final Todo newTodo =
+                        Todo(myController.text, dropdownValue, null);
+                    Navigator.pop(context, newTodo);
                   },
                   icon: const Icon(Icons.add))
             ],
