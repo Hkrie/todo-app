@@ -33,7 +33,7 @@ class TodoList extends StatefulWidget {
 class _TodoListState extends State<TodoList> {
   final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
   List<Todo> _todos = <Todo>[];
-  List<Todo> _doneTodos = <Todo>[];
+  final List<Todo> _doneTodos = <Todo>[];
   final _biggerFont = const TextStyle(fontSize: 18);
   final _normalFont = const TextStyle(fontSize: 14);
 
