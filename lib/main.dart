@@ -24,9 +24,10 @@ class MyApp extends StatelessWidget {
 }
 
 class TodoList extends StatefulWidget {
-  const TodoList({Key? key, this.newTodo, this.todoList}) : super(key: key);
+  const TodoList({Key? key, this.newTodo, this.todoList, this.doneTodoList}) : super(key: key);
   final Todo? newTodo;
   final List<Todo>? todoList;
+  final List<Todo>? doneTodoList;
 
   @override
   State<TodoList> createState() => _TodoListState();
@@ -35,7 +36,7 @@ class TodoList extends StatefulWidget {
 class _TodoListState extends State<TodoList> {
   final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
   List<Todo> _todos = <Todo>[];
-  final List<Todo> _doneTodos = <Todo>[];
+  List<Todo> _doneTodos = <Todo>[];
   final _biggerFont = const TextStyle(fontSize: 18);
 
   Widget slideIt(
@@ -110,9 +111,13 @@ class _TodoListState extends State<TodoList> {
       _todos = widget.todoList!;
     }
     if (widget.newTodo != null) {
-      listKey.currentState!
-          .insertItem(0, duration: const Duration(milliseconds: 500));
+      listKey.currentState
+          ?.insertItem(0, duration: const Duration(milliseconds: 500));
       _todos.insert(0, widget.newTodo!);
+    }
+
+    if(widget.doneTodoList != null){
+      _doneTodos = widget.doneTodoList!;
     }
 
     return Scaffold(
@@ -124,7 +129,7 @@ class _TodoListState extends State<TodoList> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => AddTodoScreen(oldTodoList: _todos)),
+                    builder: (context) => AddTodoScreen(oldTodoList: _todos, doneTodoList: _doneTodos)),
               );
             },
             icon: const Icon(Icons.add),

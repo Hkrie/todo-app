@@ -5,8 +5,9 @@ import '_todo.dart';
 import 'main.dart';
 
 class AddTodoScreen extends StatefulWidget {
-  const AddTodoScreen({Key? key, required this.oldTodoList}) : super(key: key);
+  const AddTodoScreen({Key? key, required this.oldTodoList, required this.doneTodoList}) : super(key: key);
   final List<Todo> oldTodoList;
+  final List<Todo> doneTodoList;
 
   @override
   State<AddTodoScreen> createState() => _AddTodoScreenState();
@@ -72,6 +73,7 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
                         builder: (context) => TodoList(
                           newTodo: newTodo,
                           todoList: oldTodoList,
+                          doneTodoList: widget.doneTodoList
                         ),
                       ),
                     );
