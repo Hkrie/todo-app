@@ -2,14 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '_todo.dart';
-import 'main.dart';
 
 class AddTodoScreen extends StatefulWidget {
   const AddTodoScreen(
-      {Key? key, required this.oldTodoList, required this.doneTodoList})
+      {Key? key, required this.oldTodoList})
       : super(key: key);
   final List<Todo> oldTodoList;
-  final List<Todo> doneTodoList;
 
   @override
   State<AddTodoScreen> createState() => _AddTodoScreenState();

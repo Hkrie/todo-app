@@ -134,7 +134,6 @@ class _TodoListState extends State<TodoList> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Todo List'),
@@ -149,10 +148,9 @@ class _TodoListState extends State<TodoList> {
               final newTodo = await Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => AddTodoScreen(
-                        oldTodoList: _todos, doneTodoList: _doneTodos)),
+                    builder: (context) => AddTodoScreen(oldTodoList: _todos)),
               );
-              if (newTodo != null){
+              if (newTodo != null) {
                 listKey.currentState!.insertItem(_todos.length,
                     duration: const Duration(milliseconds: 500));
                 _todos.add(newTodo);
