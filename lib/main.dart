@@ -152,9 +152,11 @@ class _TodoListState extends State<TodoList> {
                     builder: (context) => AddTodoScreen(
                         oldTodoList: _todos, doneTodoList: _doneTodos)),
               );
-              listKey.currentState!.insertItem(_todos.length,
-                  duration: const Duration(milliseconds: 500));
-              _todos.add(newTodo);
+              if (newTodo != null){
+                listKey.currentState!.insertItem(_todos.length,
+                    duration: const Duration(milliseconds: 500));
+                _todos.add(newTodo);
+              }
             },
             icon: const Icon(Icons.add),
             tooltip: 'Add Todo',
