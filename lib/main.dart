@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:todo_list/DoneTodoScreen.dart';
 import './_todo.dart';
 import 'AddTodoScreen.dart';
 
@@ -74,39 +75,6 @@ class _TodoListState extends State<TodoList> {
     );
   }
 
-  void _showDoneTodo() {
-    Navigator.of(context).push(MaterialPageRoute<void>(builder: (context) {
-      final tiles = _doneTodos.map((doneTodoItem) {
-        return ListTile(
-          trailing: const Icon(
-            Icons.check_box,
-            semanticLabel: "Remove from done",
-          ),
-          onTap: () {
-            listKey.currentState!.insertItem(_todos.length,
-                duration: const Duration(milliseconds: 500));
-            _todos.add(doneTodoItem);
-            _doneTodos.remove(doneTodoItem);
-            Navigator.of(context).pop();
-          },
-          title: Text(
-            doneTodoItem.todoText,
-            style: _biggerFont,
-          ),
-        );
-      });
-      final divided = tiles.isNotEmpty
-          ? ListTile.divideTiles(context: context, tiles: tiles).toList()
-          : <Widget>[];
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Done Todos'),
-        ),
-        body: ListView(children: divided),
-      );
-    }));
-  }
-
   _convertPriority(prio) {
     switch (prio) {
       case 'Highest':
@@ -160,7 +128,22 @@ class _TodoListState extends State<TodoList> {
             tooltip: 'Add Todo',
           ),
           IconButton(
-            onPressed: _showDoneTodo,
+            onPressed: () async {
+              final previouslyDoneTodo = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => DoneTodoScreen(doneTodoList: _doneTodos)),
+              );
+              if (previouslyDoneTodo != null) {
+                setState(() {
+                  _doneTodos.remove(previouslyDoneTodo);
+                });
+
+                listKey.currentState!.insertItem(_todos.length,
+                    duration: const Duration(milliseconds: 500));
+                _todos.add(previouslyDoneTodo);
+              }
+            },
             icon: const Icon(Icons.check_box),
             tooltip: 'Show Done Todos',
           )
