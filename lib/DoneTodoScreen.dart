@@ -13,10 +13,17 @@ class DoneTodoScreen extends StatefulWidget {
 }
 
 class _DoneTodoScreenState extends State<DoneTodoScreen> {
+  List<Todo> doneTodoList = <Todo>[];
+  final TextStyle biggerFont = const TextStyle(fontSize: 18);
+
+  _deleteAllDoneTodos() {
+    doneTodoList = <Todo>[];
+    Navigator.pop(context, DoneTodoResult(null, doneTodoList));
+  }
+
   @override
   Widget build(BuildContext context) {
-    final doneTodoList = widget.doneTodoList;
-    const biggerFont = TextStyle(fontSize: 18);
+    doneTodoList = widget.doneTodoList;
 
     final tiles = doneTodoList.map((doneTodoItem) {
       return ListTile(
@@ -25,7 +32,7 @@ class _DoneTodoScreenState extends State<DoneTodoScreen> {
           semanticLabel: "Remove from done",
         ),
         onTap: () {
-          Navigator.pop(context, doneTodoItem);
+          Navigator.pop(context, DoneTodoResult(doneTodoItem, null));
         },
         title: Text(
           doneTodoItem.todoText,
@@ -38,10 +45,21 @@ class _DoneTodoScreenState extends State<DoneTodoScreen> {
         ? ListTile.divideTiles(context: context, tiles: tiles).toList()
         : <Widget>[];
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Done Todos'),
-      ),
+      appBar: AppBar(title: const Text('Done Todos'), actions: [
+        IconButton(
+          onPressed: _deleteAllDoneTodos,
+          icon: const Icon(Icons.delete),
+          tooltip: 'Delete all doneTodos',
+        ),
+      ]),
       body: ListView(children: divided),
     );
   }
+}
+
+class DoneTodoResult {
+  Todo? previouslyDoneTodo;
+  List<Todo>? doneTodoList;
+
+  DoneTodoResult(this.previouslyDoneTodo, this.doneTodoList);
 }

@@ -34,7 +34,7 @@ class TodoList extends StatefulWidget {
 class _TodoListState extends State<TodoList> {
   final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
   List<Todo> _todos = <Todo>[];
-  final List<Todo> _doneTodos = <Todo>[];
+  List<Todo> _doneTodos = <Todo>[];
   final _biggerFont = const TextStyle(fontSize: 18);
   final _normalFont = const TextStyle(fontSize: 14);
 
@@ -129,19 +129,23 @@ class _TodoListState extends State<TodoList> {
           ),
           IconButton(
             onPressed: () async {
-              final previouslyDoneTodo = await Navigator.push(
+              final DoneTodoResult result = await Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => DoneTodoScreen(doneTodoList: _doneTodos)),
+                    builder: (context) =>
+                        DoneTodoScreen(doneTodoList: _doneTodos)),
               );
-              if (previouslyDoneTodo != null) {
+              if (result.previouslyDoneTodo != null) {
                 setState(() {
-                  _doneTodos.remove(previouslyDoneTodo);
+                  _doneTodos.remove(result.previouslyDoneTodo);
                 });
-
                 listKey.currentState!.insertItem(_todos.length,
                     duration: const Duration(milliseconds: 500));
-                _todos.add(previouslyDoneTodo);
+                _todos.add(result.previouslyDoneTodo!);
+              }
+
+              if (result.doneTodoList != null) {
+                _doneTodos = result.doneTodoList!;
               }
             },
             icon: const Icon(Icons.check_box),
