@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:todo_list/DoneTodoScreen.dart';
+import 'package:todo_list/DoneTodoStorage.dart';
 import './_todo.dart';
 import 'AddTodoScreen.dart';
 
@@ -129,24 +130,27 @@ class _TodoListState extends State<TodoList> {
           ),
           IconButton(
             onPressed: () async {
-              final DoneTodoResult result = await Navigator.push(
+              final DoneTodoResult? result = await Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (context) =>
-                        DoneTodoScreen(doneTodoList: _doneTodos)),
+                        DoneTodoScreen(doneTodoList: _doneTodos, storage: DoneTodoStorage(),)),
               );
-              if (result.previouslyDoneTodo != null) {
-                setState(() {
-                  _doneTodos.remove(result.previouslyDoneTodo);
-                });
-                listKey.currentState!.insertItem(_todos.length,
-                    duration: const Duration(milliseconds: 500));
-                _todos.add(result.previouslyDoneTodo!);
+              if(result != null){
+                if (result.previouslyDoneTodo != null) {
+                  setState(() {
+                    _doneTodos.remove(result.previouslyDoneTodo);
+                  });
+                  listKey.currentState!.insertItem(_todos.length,
+                      duration: const Duration(milliseconds: 500));
+                  _todos.add(result.previouslyDoneTodo!);
+                }
+
+                if (result.doneTodoList != null) {
+                  _doneTodos = result.doneTodoList!;
+                }
               }
 
-              if (result.doneTodoList != null) {
-                _doneTodos = result.doneTodoList!;
-              }
             },
             icon: const Icon(Icons.check_box),
             tooltip: 'Show Done Todos',
@@ -159,6 +163,7 @@ class _TodoListState extends State<TodoList> {
         itemBuilder: (context, index, animation) {
           return slideIt(context, null, index, animation);
         },
+
       ),
     );
   }
