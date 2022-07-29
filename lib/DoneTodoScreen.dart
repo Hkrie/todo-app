@@ -1,16 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'DoneTodoStorage.dart';
+import 'TodoStorage.dart';
 import '_todo.dart';
 import 'dart:developer';
 
 class DoneTodoScreen extends StatefulWidget {
   const DoneTodoScreen(
-      {Key? key, required this.doneTodoList, required this.storage})
+      {Key? key, required this.doneTodoList})
       : super(key: key);
   final List<Todo> doneTodoList;
-  final DoneTodoStorage storage;
+
 
   @override
   State<DoneTodoScreen> createState() => _DoneTodoScreenState();
@@ -21,20 +21,13 @@ class _DoneTodoScreenState extends State<DoneTodoScreen> {
   List<Todo> savedList = <Todo>[];
   final TextStyle biggerFont = const TextStyle(fontSize: 18);
 
-  _saveDoneTodos(List<Todo> todoList) {
-    widget.storage.writeDoneTodo(todoList);
-  }
-
   _deleteAllDoneTodos() {
-    _saveDoneTodos(List.from(doneTodoList));
     doneTodoList = <Todo>[];
     Navigator.pop(context, DoneTodoResult(null, doneTodoList));
   }
 
   @override
   Widget build(BuildContext context) {
-    widget.storage.writeDoneTodo(doneTodoList);
-
     doneTodoList = widget.doneTodoList;
 
     final tiles = doneTodoList.map((doneTodoItem) {

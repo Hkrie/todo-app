@@ -1,6 +1,9 @@
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:todo_list/DoneTodoScreen.dart';
-import 'package:todo_list/DoneTodoStorage.dart';
+import 'package:todo_list/TodoStorage.dart';
 import './_todo.dart';
 import 'AddTodoScreen.dart';
 
@@ -21,12 +24,13 @@ class MyApp extends StatelessWidget {
             foregroundColor: Colors.blue,
           ),
         ),
-        home: const TodoList());
+        home: TodoList(storage: TodoStorage()));
   }
 }
 
 class TodoList extends StatefulWidget {
-  const TodoList({Key? key}) : super(key: key);
+  const TodoList({Key? key, required this.storage}) : super(key: key);
+  final TodoStorage storage;
 
   @override
   State<TodoList> createState() => _TodoListState();
@@ -101,6 +105,27 @@ class _TodoListState extends State<TodoList> {
     });
   }
 
+  _writeOpenTodos() {
+    widget.storage.writeTodos(_todos);
+  }
+
+  _readAndLoadSavedOpenTodos() async {
+    final savedTodos = await widget.storage.readTodos();
+    if (savedTodos != null) {
+      _todos = savedTodos;
+      _todos.asMap().forEach((index, value) => {
+            listKey.currentState!
+                .insertItem(index, duration: const Duration(milliseconds: 500))
+          });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _readAndLoadSavedOpenTodos();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -123,6 +148,7 @@ class _TodoListState extends State<TodoList> {
                 listKey.currentState!.insertItem(_todos.length,
                     duration: const Duration(milliseconds: 500));
                 _todos.add(newTodo);
+                _writeOpenTodos();
               }
             },
             icon: const Icon(Icons.add),
@@ -133,10 +159,11 @@ class _TodoListState extends State<TodoList> {
               final DoneTodoResult? result = await Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) =>
-                        DoneTodoScreen(doneTodoList: _doneTodos, storage: DoneTodoStorage(),)),
+                    builder: (context) => DoneTodoScreen(
+                          doneTodoList: _doneTodos,
+                        )),
               );
-              if(result != null){
+              if (result != null) {
                 if (result.previouslyDoneTodo != null) {
                   setState(() {
                     _doneTodos.remove(result.previouslyDoneTodo);
@@ -144,13 +171,13 @@ class _TodoListState extends State<TodoList> {
                   listKey.currentState!.insertItem(_todos.length,
                       duration: const Duration(milliseconds: 500));
                   _todos.add(result.previouslyDoneTodo!);
+                  _writeOpenTodos();
                 }
 
                 if (result.doneTodoList != null) {
                   _doneTodos = result.doneTodoList!;
                 }
               }
-
             },
             icon: const Icon(Icons.check_box),
             tooltip: 'Show Done Todos',
@@ -163,7 +190,6 @@ class _TodoListState extends State<TodoList> {
         itemBuilder: (context, index, animation) {
           return slideIt(context, null, index, animation);
         },
-
       ),
     );
   }
